@@ -27,6 +27,7 @@ private:
 
   void send_datagram( void );
   void got_ack( const uint64_t timestamp, const ContestMessage & msg );
+  void handle_timeout(void);
   bool window_is_open( void );
 
 public:
@@ -62,7 +63,7 @@ DatagrumpSender::DatagrumpSender( const char * const host,
 				  const char * const port,
 				  const bool debug )
   : socket_(),
-    controller_( debug ),
+    controller_( debug, 50, 1, 2 ),
     sequence_number_( 0 ),
     next_ack_expected_( 0 )
 {
@@ -72,7 +73,7 @@ DatagrumpSender::DatagrumpSender( const char * const host,
   /* connect socket to the remote host */
   /* (note: this doesn't send anything; it just tags the socket
      locally with the remote address */
-  socket_.connect( Address( host, port ) );  
+  socket_.connect( Address( host, port ) );
 
   cerr << "Sending to " << socket_.peer_address().to_string() << endl;
 }
@@ -114,6 +115,11 @@ bool DatagrumpSender::window_is_open( void )
   return sequence_number_ - next_ack_expected_ < controller_.window_size();
 }
 
+void DatagrumpSender::handle_timeout(void) {
+  controller_.timed_out();
+  send_datagram();
+}
+
 int DatagrumpSender::loop( void )
 {
   /* read and write from the receiver using an event-driven "poller" */
@@ -148,7 +154,7 @@ int DatagrumpSender::loop( void )
       return ret.exit_status;
     } else if ( ret.result == PollResult::Timeout ) {
       /* After a timeout, send one datagram to try to get things moving again */
-      send_datagram();
+      handle_timeout();
     }
   }
 }
