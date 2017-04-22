@@ -7,11 +7,8 @@
 
 class Controller
 {
-private:
+protected:
   bool debug_; /* Enables debugging output */
-  float cwnd_; /* Congestion window */
-  float aimd_inc_param_; /* Increase cwnd by this per RTT */
-  float aimd_dec_param_; /* Decrease cwnd by this factor per timeout */
 
   /* Add member variables here */
 
@@ -22,10 +19,6 @@ public:
 
   /* Default constructor */
   Controller( const bool debug );
-  Controller( const bool debug,
-      const float cwnd,
-      const int aimd_inc_param,
-      const int aimd_dec_param);
 
   /* Get current window size, in datagrams */
   unsigned int window_size( void );
@@ -40,13 +33,9 @@ public:
 		     const uint64_t recv_timestamp_acked,
 		     const uint64_t timestamp_ack_received );
 
-  /* Timeout occured*/
-  void timed_out( void );
-
   /* How long to wait (in milliseconds) if there are no acks
      before sending one more datagram */
   unsigned int timeout_ms( void );
-
 };
 
 #endif

@@ -7,29 +7,14 @@ using namespace std;
 
 /* Default constructor */
 Controller::Controller( const bool debug )
-  : debug_( debug ),
-    cwnd_ (50),
-    aimd_inc_param_ (0),
-    aimd_dec_param_ (1)
+  : debug_( debug )
 {}
-
-/* Default constructor */
-Controller::Controller( const bool debug,
-    const float cwnd,
-    const int aimd_inc_param,
-    const int aimd_dec_param)
-  : debug_( debug ),
-    cwnd_ (cwnd),
-    aimd_inc_param_ (aimd_inc_param),
-    aimd_dec_param_ (aimd_dec_param)
-{}
-
 
 /* Get current window size, in datagrams */
 unsigned int Controller::window_size( void )
 {
   /* Default: fixed window size of 100 outstanding datagrams */
-  unsigned int the_window_size = static_cast<unsigned int>(cwnd_);
+  unsigned int the_window_size = 12;
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ms()
@@ -63,31 +48,17 @@ void Controller::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
-  /* Additive increase */
-  cwnd_ += aimd_inc_param_/cwnd_;
+  /* Default: take no action */
 
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
 	 << " received ack for datagram " << sequence_number_acked
 	 << " (send @ time " << send_timestamp_acked
 	 << ", received @ time " << recv_timestamp_acked << " by receiver's clock)"
-	 << ", cwnd " << cwnd_ << endl;
+	 << endl;
   }
 }
 
-/* An ack was received */
-void Controller::timed_out()
-  /* when time put happens */
-{
-  /* Multiplicative decrease */
-  if (cwnd_ > 1) {
-    cwnd_ /= aimd_dec_param_;
-  }
-
-  if ( debug_ ) {
-    cerr << "Timed out. cwnd: " << cwnd_ << endl;
-  }
-}
 /* How long to wait (in milliseconds) if there are no acks
    before sending one more datagram */
 unsigned int Controller::timeout_ms( void )
