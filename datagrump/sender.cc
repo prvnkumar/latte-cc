@@ -1,11 +1,13 @@
 /* UDP sender for congestion-control contest */
 
 #include <cstdlib>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "socket.hh"
 #include "contest_message.hh"
-#include "rttaimdcontroller.hh"
+#include "metacontroller.hh"
 #include "poller.hh"
 
 using namespace std;
@@ -16,7 +18,7 @@ class DatagrumpSender
 {
 private:
   UDPSocket socket_;
-  RttAimdController controller_; /* your class */
+  MetaController controller_; /* your class */
 
   uint64_t sequence_number_; /* next outgoing sequence number */
 
@@ -29,6 +31,7 @@ private:
   void got_ack( const uint64_t timestamp, const ContestMessage & msg );
   void handle_timeout(void);
   bool window_is_open( void );
+  void moderate_packets( void );
 
 public:
   DatagrumpSender( const char * const host, const char * const port,
@@ -120,6 +123,13 @@ void DatagrumpSender::handle_timeout(void) {
   send_datagram();
 }
 
+void DatagrumpSender::moderate_packets(void) {
+  float waittime = controller_.get_interpkt_delay();
+  std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>(waittime*800)));
+  //cerr << "Wait for: " << waittime << endl;
+}
+
+
 int DatagrumpSender::loop( void )
 {
   /* read and write from the receiver using an event-driven "poller" */
@@ -127,13 +137,19 @@ int DatagrumpSender::loop( void )
 
   /* first rule: if the window is open, close it by
      sending more datagrams */
-  poller.add_action( Action( socket_, Direction::Out, [&] () {
-	/* Close the window */
-	while ( window_is_open() ) {
-	  send_datagram();
-	}
-	return ResultType::Continue;
-      },
+
+  poller.add_action( Action( socket_, Direction::Out,
+        /* Close the window */
+        //[&] () { while ( window_is_open() ) { send_datagram(); } return ResultType::Continue; },
+
+        [&] () {
+        while ( window_is_open() ) {
+          send_datagram();
+          moderate_packets();
+        }
+        return ResultType::Continue;
+        },
+
       /* We're only interested in this rule when the window is open */
       [&] () { return window_is_open(); } ) );
 
