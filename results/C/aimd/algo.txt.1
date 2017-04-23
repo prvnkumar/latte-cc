@@ -3,8 +3,7 @@ uint64_t rtt = timestamp_ack_received - send_timestamp_acked;
     cwnd_ += 1/cwnd_;
   }
   else {
-    if (cwnd_ > 1) {
-    /* cwnd_ = 1/cwnd_; */
+    if (cwnd_ > 2) {
       cwnd_ = cwnd_/2;
     }
   }
