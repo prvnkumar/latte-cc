@@ -5,7 +5,7 @@
 
 #include "socket.hh"
 #include "contest_message.hh"
-#include "rttcontroller.hh"
+#include "rttaimdcontroller.hh"
 #include "poller.hh"
 
 using namespace std;
@@ -16,7 +16,7 @@ class DatagrumpSender
 {
 private:
   UDPSocket socket_;
-  RttController controller_; /* your class */
+  RttAimdController controller_; /* your class */
 
   uint64_t sequence_number_; /* next outgoing sequence number */
 
@@ -63,7 +63,7 @@ DatagrumpSender::DatagrumpSender( const char * const host,
 				  const char * const port,
 				  const bool debug )
   : socket_(),
-    controller_( debug, 50, 75 ),
+    controller_( debug, 50, 200 ),
     sequence_number_( 0 ),
     next_ack_expected_( 0 )
 {

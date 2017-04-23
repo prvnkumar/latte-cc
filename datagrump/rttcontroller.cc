@@ -52,7 +52,7 @@ void RttController::ack_received( const uint64_t sequence_number_acked,
   }
   else {
     if (cwnd_ > 1) {
-    cwnd_ -= 1/cwnd_;
+      cwnd_ -= 1/cwnd_;
     }
   }
 

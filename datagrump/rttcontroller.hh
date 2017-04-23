@@ -8,7 +8,7 @@
 
 class RttController : public Controller
 {
-private:
+protected:
   float cwnd_; /* Congestion window */
   float rtt_thresh_; /* RTT threshold */
 

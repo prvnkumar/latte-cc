@@ -4,7 +4,7 @@ LDADD = ../src/libsourdough.a -lpthread
 
 common_source = contest_message.hh contest_message.cc \
 	controller.hh controller.cc aimdcontroller.cc aimdcontroller.hh \
-	rttcontroller.hh rttcontroller.cc
+	rttcontroller.hh rttcontroller.cc rttaimdcontroller.hh rttaimdcontroller.cc
 
 bin_PROGRAMS = sender receiver
 
