@@ -125,7 +125,7 @@ void DatagrumpSender::handle_timeout(void) {
 
 void DatagrumpSender::moderate_packets(void) {
   float waittime = controller_.get_interpkt_delay();
-  std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>(waittime*800)));
+  std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>(waittime)));
   //cerr << "Wait for: " << waittime << endl;
 }
 

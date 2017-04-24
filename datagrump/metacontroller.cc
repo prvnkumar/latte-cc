@@ -42,6 +42,8 @@ void MetaController::ack_received( const uint64_t sequence_number_acked,
 			       const uint64_t timestamp_ack_received )
                                /* when the ack was received (by sender) */
 {
+  // auto prev_cwnd = cwnd_;
+
   /* Get latest RTT */
   uint64_t rtt_t = timestamp_ack_received - send_timestamp_acked;
 
@@ -66,8 +68,8 @@ void MetaController::ack_received( const uint64_t sequence_number_acked,
     cerr << "time " << timestamp_ack_received << " bdp " << bdp_ << " pkts" << endl;
   }
 
-  cwnd_ = 1.7 * bdp_;
-  /* Find minimum RTT in the window */
+  cwnd_ =  lambda_ * bdp_;
+
   rtt_thresh_ = 1.5 * min_rtt_;
 
   /* Cwnd AIMD update */
@@ -81,12 +83,31 @@ void MetaController::ack_received( const uint64_t sequence_number_acked,
     }
   }
   */
-  if (rtt_t > min_rtt_) {
+  if (rtt_t > min_rtt_) { /* Mostly true */
     cwnd_ /= (rtt_t/min_rtt_);
   }
 
   /* Ensure window >= 3 */
   cwnd_ = cwnd_ < 3 ? 3 : cwnd_;
+
+  /* Conservative approach */
+  /*
+  if (cwnd_ >= prev_cwnd && conservative_mode_) {
+    if (conservative_mode_) {
+      cwnd_ *= 0.6;
+    }
+    conservative_mode_ = false;
+    //cerr << "conservative false" << endl;
+  }
+  else if (cwnd_ < prev_cwnd) {
+    if (conservative_mode_) {
+      cwnd_ *= 0.6;
+    }
+    conservative_mode_ = true;
+    //cerr << "conservative true" << endl;
+  }
+  */
+
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
 	 << " received ack for datagram " << sequence_number_acked
@@ -112,7 +133,7 @@ void MetaController::timed_out()
 /* Wait for some time between sending packets */
 float MetaController::get_interpkt_delay( void )
 {
-  return 1./curr_max_bw_;
+  return 1./curr_max_bw_ * gamma_ * 1000;
 }
 
 

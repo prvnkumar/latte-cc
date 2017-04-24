@@ -39,7 +39,7 @@ class BwWindow
     /* Update BW samples */
     void update_bw_samples( uint64_t curr_time, float bw_sample );
 
-    /* Return max of the SW samples */
+    /* Return max of the BW samples */
     float max_bw( void );
 
 };
@@ -77,9 +77,13 @@ protected:
   float bdp_{100};
   float curr_max_bw_{100};
 
+  float lambda_{1.7};
+  float gamma_{0.8};
+
   RttWindow rtt_window_;
   DeliveryWindow delivery_window_;
   BwWindow bw_window_;
+  bool conservative_mode_{false};
 
 public:
   MetaController( const bool debug,
