@@ -29,7 +29,7 @@ class BwWindow
 {
   private:
     bool debug_;
-    uint64_t bw_sample_window_ {1000};
+    uint64_t bw_sample_window_ {200};
     std::deque<std::pair<uint64_t, float>> bw_samples_ {};
 
   public:

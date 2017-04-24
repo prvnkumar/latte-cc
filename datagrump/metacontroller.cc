@@ -85,7 +85,7 @@ void MetaController::ack_received( const uint64_t sequence_number_acked,
     cwnd_ /= (rtt_t/min_rtt_);
   }
 
-  /* Ensure window >= 2 */
+  /* Ensure window >= 3 */
   cwnd_ = cwnd_ < 3 ? 3 : cwnd_;
   if ( debug_ ) {
     cerr << "At time " << timestamp_ack_received
@@ -120,8 +120,7 @@ float MetaController::get_interpkt_delay( void )
    before sending one more datagram */
 unsigned int MetaController::timeout_ms( void )
 {
-  //return static_cast<unsigned int>(2.5 * min_rtt_);
-  return 100;
+  return static_cast<unsigned int>(2 * min_rtt_);
 }
 
 
