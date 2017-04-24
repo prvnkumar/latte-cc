@@ -74,8 +74,8 @@ protected:
   float cwnd_; /* Congestion window */
   float rtt_thresh_; /* RTT threshold */
   float min_rtt_;   /* Min RTT seen */
-  float bdp_{100};
-  float curr_max_bw_{100};
+  float bdp_{10};
+  float curr_max_bw_{10};
 
   float lambda_{1.7};
   float gamma_{0.8};
