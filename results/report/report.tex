@@ -5,6 +5,7 @@
 \usepackage{multicol}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage[linewidth=1pt]{mdframed}
 \DeclareMathOperator{\mbps}{Mbits/s}
 \begin{document}
 
@@ -175,10 +176,15 @@ show rtt\_thresh}
 \label{aimdrtt-score}
 \end{figure}
 
-From Fig.~\ref{aimdrtt}, we see that increasing $rtt\_thresh$
-increases throughput but also increases latency. As seen in
-Fig.~\ref{aimdrtt-score}, the maximum score of 22 is achieved at
-$rtt\_thresh = 120ms$.
+This improves on the previous method of simply increasing or
+decreasing the congestion window linearly based on whether the RTT was
+below or above a threshold. The performance becomes more predictable
+and follows a tradeoff curve. From Fig.~\ref{aimdrtt}, we see that
+increasing $rtt\_thresh$ increases throughput but also increases
+latency.\\
+
+As seen in Fig.~\ref{aimdrtt-score}, the maximum score of 22 is
+achieved at $rtt\_thresh = 120ms$.
 
 \clearpage
 \section{D - The Contest}
@@ -305,7 +311,7 @@ the congestion window on every ACK. Whenever we receive an ACK with
 higher RTT, we decrease the congestion window by a factor of $rtt_t /
 min\_rtt$.  Thus, the congestion window effectively becomes:
 \[
-  $\lambda \times bandwidth \times min\_rtt^2 / rtt_t
+  \lambda \times bandwidth \times min\_rtt^2 / rtt_t
 \]
 when $rtt_t$ is high. This ensures that we do not create congestion in
 the steady state and $rtt_t$ are close to $min\_rtt$. 
@@ -320,12 +326,15 @@ after optimizing the control parameters, we were able to achieve a
 
 \url{http://cs344g.keithw.org/report/?Latte-1492997567-eezahmoy}\\
 
+\begin{mdframed}
 \begin{alltt}
 Average capacity: 5.04 Mbits/s
 Average throughput: 3.83 Mbits/s (75.9\% utilization)
 95th percentile per-packet queueing delay: 50 ms
 95th percentile signal delay: 90 ms
+Power Score: 42.56
 \end{alltt}
+\end{mdframed}
 
 \begin{figure}[h]
 \includegraphics[width=1.2\columnwidth]{"tput"}
@@ -348,6 +357,7 @@ decreases $\lambda$ as congestion window increases to decrease the
 probability (and amount) of overshooting capacity. As a result, the
 performance on the given trace decreases. The results are at:\\
 \url{http://cs344g.keithw.org/report/?Latte-1493317091-ifaikaix}
+\begin{mdframed}
 \begin{alltt}
 Average capacity: 5.04 Mbits/s
 Average throughput: 3.83 Mbits/s (76.0% utilization)
@@ -355,7 +365,8 @@ Average throughput: 3.83 Mbits/s (76.0% utilization)
 95th percentile signal delay: 93 ms
 \end{alltt}
 
-\textbf{Power score = 41.18}
+\textbf{*** Power score = 41.18 ***}
+\end{mdframed}
 The corresponding throughput and delay time series are shown in
 Figures~\ref{tput} and ~\ref{delay}.
 
@@ -365,4 +376,7 @@ state, but react aggresively to increase in RTT to achieve high power
 score. We build Latte along this lines by following bottleneck
 bandwidth and RTT estimation similar to BBR and augment it with
 multiplicative decrease based on observed RTT.
+
+\bibliographystyle{unsrt}
+\bibliography{report}
 \end{document}
