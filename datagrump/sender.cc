@@ -8,6 +8,7 @@
 #include "socket.hh"
 #include "contest_message.hh"
 #include "metacontroller.hh"
+#include "lattecontroller.hh"
 #include "poller.hh"
 
 using namespace std;
@@ -18,7 +19,7 @@ class DatagrumpSender
 {
 private:
   UDPSocket socket_;
-  MetaController controller_; /* your class */
+  LatteController controller_; /* your class */
 
   uint64_t sequence_number_; /* next outgoing sequence number */
 
@@ -66,7 +67,7 @@ DatagrumpSender::DatagrumpSender( const char * const host,
 				  const char * const port,
 				  const bool debug )
   : socket_(),
-    controller_( debug, 50, 200 ),
+    controller_( debug ),
     sequence_number_( 0 ),
     next_ack_expected_( 0 )
 {
@@ -126,6 +127,18 @@ void DatagrumpSender::handle_timeout(void) {
 void DatagrumpSender::moderate_packets(void) {
   float waittime = controller_.get_interpkt_delay();
   std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>(waittime)));
+  /*
+  bool sleep = true;
+  auto start = std::chrono::system_clock::now();
+  while(sleep)
+  {
+    auto now = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - start);
+    if ( elapsed.count() > waittime ) {
+        sleep = false;
+    }
+  }
+  */
   //cerr << "Wait for: " << waittime << endl;
 }
 

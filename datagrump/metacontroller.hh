@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <deque>
 
@@ -12,7 +13,7 @@ class RttWindow
 {
   private:
     bool debug_;
-    uint64_t rtt_sample_window_ {5000};
+    uint64_t rtt_sample_window_ {10000};
     std::deque<std::pair<uint64_t, uint64_t>> rtt_samples_ {};
 
   public:
@@ -23,13 +24,17 @@ class RttWindow
 
     /* Return minimum of the RTT samples */
     uint64_t min_rtt( void );
+
+    /* Return latest RTT samples */
+    uint64_t last_rtt( void );
+
 };
 
 class BwWindow
 {
   private:
     bool debug_;
-    uint64_t bw_sample_window_ {200};
+    uint64_t bw_window_size_ {200};
     std::deque<std::pair<uint64_t, float>> bw_samples_ {};
 
   public:
@@ -42,13 +47,16 @@ class BwWindow
     /* Return max of the BW samples */
     float max_bw( void );
 
+    /* Set BW window size */
+    void update_bw_window_size( uint64_t size );
+
 };
 
 class DeliveryWindow
 {
   private:
     bool debug_;
-    uint64_t delivery_data_window_ {5000};
+    uint64_t delivery_data_window_ {15000};
     std::deque<std::pair<uint64_t, uint64_t>> delivery_data_ {};
     uint64_t last_delivered_{0};
 
@@ -71,14 +79,22 @@ class DeliveryWindow
 class MetaController : public Controller
 {
 protected:
-  float cwnd_; /* Congestion window */
-  float rtt_thresh_; /* RTT threshold */
-  float min_rtt_;   /* Min RTT seen */
+  float cwnd_{10}; /* Congestion window */
+  float rtt_thresh_{500}; /* RTT threshold */
+  uint64_t min_rtt_{50};   /* Min RTT seen */
+  float srtt_{50};
   float bdp_{10};
-  float curr_max_bw_{10};
+  float curr_max_bw_{1};
+  float rtt_grad_{0};
 
-  float lambda_{1.7};
-  float gamma_{0.8};
+  float alpha_{0.8};
+
+  float lambda_{2.0};
+
+  /* Packet pacing parameters */
+  uint8_t last_gamma_update_{0};
+  uint8_t gamma_state_{0};
+  std::vector<float> gamma_vals_ = {0.8, 1.33, 1, 1, 1};
 
   RttWindow rtt_window_;
   DeliveryWindow delivery_window_;
@@ -86,9 +102,7 @@ protected:
   bool conservative_mode_{false};
 
 public:
-  MetaController( const bool debug,
-      const float cwnd,
-      const uint64_t rtt_thresh);
+  MetaController( const bool debug );
 
   /* Timeout occured*/
   void timed_out( void );
