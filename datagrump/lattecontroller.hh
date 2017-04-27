@@ -18,8 +18,10 @@ protected:
   float min_rtt_{500};   /* Min RTT seen */
   float bdp_{10};
   float curr_max_bw_{10};
+  float rtt_grad_{0};
+  float sbw_t_{10};
 
-  float lambda_{2};
+  float lambda_{2.0};
   float gamma_{0.8};
 
   RttWindow rtt_window_;
